@@ -2,177 +2,309 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Sudoku Wardrobe</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f5f2ee;
+    --surface: #ffffff;
+    --surface2: #faf8f6;
+    --ink: #1c1917;
+    --ink2: #78716c;
+    --ink3: #a8a29e;
+    --accent: #c2a46e;
+    --accent2: #e8d5b5;
+    --border: #e7e2db;
+    --radius: 14px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
   body {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    background: #f9f7f5;
-    color: #1a1a1a;
-    min-height: 100vh;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100dvh;
+    overflow-x: hidden;
   }
 
-  header {
-    padding: 32px 40px 20px;
-    border-bottom: 1px solid #e0ddd9;
+  /* ── HEADER ── */
+  .header {
+    background: var(--surface);
+    padding: calc(var(--safe-top) + 16px) 20px 16px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255,255,255,0.92);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .logo em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .header-sub {
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    margin-top: 3px;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 70px;
+    z-index: 99;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 13px 8px;
+    font-size: 11px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink3);
+    border: none;
+    background: none;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s;
+  }
+
+  .tab::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 20%; right: 20%;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+    transform: scaleX(0);
+    transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+  }
+
+  .tab.active { color: var(--ink); }
+  .tab.active::after { transform: scaleX(1); }
+
+  /* ── PAGES ── */
+  .page { display: none; padding: 0 0 calc(var(--safe-bottom) + 24px); animation: fadeUp 0.3s ease; }
+  .page.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SECTION TITLES ── */
+  .section-head {
+    padding: 20px 20px 0;
     display: flex;
     align-items: baseline;
-    gap: 16px;
+    justify-content: space-between;
   }
 
-  header h1 {
-    font-size: 22px;
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
     font-weight: 300;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.02em;
+  }
+
+  .section-count {
+    font-size: 10px;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
+    color: var(--ink3);
   }
 
-  header span {
-    font-size: 12px;
-    color: #999;
-    letter-spacing: 0.08em;
-  }
+  /* ── DRESSING PAGE ── */
+  .category-block { padding: 16px 20px 0; }
 
-  .app {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 40px;
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 48px;
-  }
-
-  /* ─── LEFT PANEL : dressing ─── */
-  .panel-title {
+  .cat-label {
     font-size: 10px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: #999;
-    margin-bottom: 20px;
-  }
-
-  .category {
-    margin-bottom: 28px;
-  }
-
-  .category-label {
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #555;
+    color: var(--ink3);
     margin-bottom: 10px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
   }
 
-  .category-label::after {
+  .cat-label::after {
     content: '';
     flex: 1;
     height: 1px;
-    background: #e0ddd9;
+    background: var(--border);
   }
 
-  .items-row {
+  .items-scroll {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
   }
 
-  .item-thumb {
-    width: 72px;
-    height: 90px;
-    border-radius: 6px;
+  .items-scroll::-webkit-scrollbar { display: none; }
+
+  .item-wrap {
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .item-img {
+    width: 80px;
+    height: 100px;
+    border-radius: 10px;
     object-fit: cover;
     border: 2px solid transparent;
-    cursor: pointer;
     transition: border-color 0.15s, transform 0.15s;
-    background: #eee;
+    display: block;
   }
 
-  .item-thumb:hover { transform: scale(1.04); }
-  .item-thumb.selected { border-color: #1a1a1a; }
+  .item-img:active { transform: scale(0.97); }
 
-  .upload-btn {
-    width: 72px;
-    height: 90px;
-    border-radius: 6px;
-    border: 1.5px dashed #ccc;
-    background: none;
+  .item-name {
+    font-size: 9px;
+    color: var(--ink2);
+    text-align: center;
+    margin-top: 4px;
+    max-width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.04em;
+  }
+
+  .item-del {
+    position: absolute;
+    top: 4px; right: 4px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: rgba(28,25,23,0.65);
+    color: #fff;
+    border: none;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .add-btn {
+    flex-shrink: 0;
+    width: 80px;
+    height: 100px;
+    border-radius: 10px;
+    border: 1.5px dashed var(--border);
+    background: var(--surface2);
     cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
-    color: #aaa;
-    font-size: 10px;
-    letter-spacing: 0.06em;
-    transition: border-color 0.15s, color 0.15s;
+    gap: 5px;
+    color: var(--ink3);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
   }
 
-  .upload-btn:hover { border-color: #888; color: #555; }
+  .add-btn:active { background: var(--accent2); border-color: var(--accent); color: var(--accent); }
 
-  .upload-btn svg { width: 18px; height: 18px; }
+  .add-btn svg { width: 20px; height: 20px; }
 
-  /* ─── RIGHT PANEL : grille + combos ─── */
-  .right-panel {}
-
-  .section-tabs {
-    display: flex;
-    gap: 0;
-    margin-bottom: 28px;
-    border-bottom: 1px solid #e0ddd9;
+  /* ── GENERATE BTN ── */
+  .gen-wrap {
+    padding: 24px 20px 0;
   }
 
-  .tab {
-    padding: 10px 20px;
-    font-size: 11px;
-    letter-spacing: 0.12em;
+  .gen-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     cursor: pointer;
-    color: #999;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-    background: none;
-    border-top: none;
-    border-left: none;
-    border-right: none;
-    transition: color 0.15s;
+    transition: background 0.15s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
   }
 
-  .tab.active { color: #1a1a1a; border-bottom-color: #1a1a1a; }
+  .gen-btn:active { transform: scale(0.98); background: #333; }
 
-  /* ─── GRILLE ─── */
-  .grid-section { display: none; }
-  .grid-section.active { display: block; }
+  .gen-btn svg { width: 16px; height: 16px; }
+
+  /* ── GRID PAGE ── */
+  .grid-wrap { padding: 20px; }
 
   .sudoku-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 24px;
+    gap: 8px;
+    margin-bottom: 20px;
   }
 
   .grid-cell {
     aspect-ratio: 2/3;
-    border-radius: 8px;
-    border: 1.5px solid #e0ddd9;
-    background: #fff;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #bbb;
     overflow: hidden;
     position: relative;
-    transition: border-color 0.2s;
+    transition: transform 0.15s;
+  }
+
+  .grid-cell.empty-cell {
+    background: var(--surface2);
   }
 
   .grid-cell img {
@@ -181,314 +313,310 @@
     object-fit: cover;
     position: absolute;
     inset: 0;
-    border-radius: 6px;
   }
 
-  .grid-cell .cell-label {
+  .cell-badge {
     position: absolute;
-    bottom: 6px;
-    left: 0; right: 0;
+    top: 5px; left: 5px;
+    font-size: 8px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: rgba(28,25,23,0.7);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 20px;
+  }
+
+  .cell-name {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    font-size: 9px;
     text-align: center;
+    padding: 4px 4px 5px;
+    background: linear-gradient(transparent, rgba(28,25,23,0.55));
+    color: #fff;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .cell-placeholder {
     font-size: 9px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    background: rgba(255,255,255,0.85);
-    padding: 3px 0;
-    color: #444;
+    color: var(--border);
   }
 
-  .cell-type-badge {
-    position: absolute;
-    top: 6px;
-    left: 6px;
-    font-size: 8px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    background: rgba(0,0,0,0.6);
-    color: #fff;
-    padding: 2px 5px;
-    border-radius: 3px;
+  .grid-hint {
+    font-size: 11px;
+    color: var(--ink3);
+    text-align: center;
+    line-height: 1.6;
+    padding: 0 10px;
   }
 
-  .grid-actions {
-    display: flex;
-    gap: 10px;
-  }
-
-  .btn {
-    padding: 10px 22px;
-    font-size: 10px;
+  .regen-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    border-radius: 4px;
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-    border: 1.5px solid #1a1a1a;
+    margin-top: 12px;
+    transition: background 0.15s;
   }
 
-  .btn-primary { background: #1a1a1a; color: #fff; }
-  .btn-primary:hover { background: #333; }
-  .btn-secondary { background: transparent; color: #1a1a1a; }
-  .btn-secondary:hover { background: #f0ede9; }
+  .regen-btn:active { background: var(--accent2); }
 
-  /* ─── COMBOS ─── */
-  .combos-section { display: none; }
-  .combos-section.active { display: block; }
+  /* ── COMBOS PAGE ── */
+  .combos-wrap { padding: 20px; }
 
-  .combos-intro {
-    font-size: 12px;
-    color: #888;
-    margin-bottom: 24px;
-    line-height: 1.6;
-  }
+  .combo-group { margin-bottom: 28px; }
 
-  .combo-group { margin-bottom: 32px; }
-
-  .combo-group-title {
-    font-size: 10px;
-    letter-spacing: 0.16em;
+  .combo-group-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: #bbb;
-    margin-bottom: 14px;
-  }
-
-  .combos-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    color: var(--ink3);
+    margin-bottom: 12px;
   }
 
   .combo-card {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 16px;
-    background: #fff;
-    border-radius: 8px;
-    border: 1px solid #e8e5e1;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 12px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
     cursor: pointer;
-    transition: border-color 0.15s, box-shadow 0.15s;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
+    -webkit-user-select: none;
   }
 
-  .combo-card:hover {
-    border-color: #bbb;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  }
+  .combo-card:active { transform: scale(0.99); }
 
-  .combo-card.highlighted {
-    border-color: #1a1a1a;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  .combo-card.fav {
+    border-color: var(--accent);
+    box-shadow: 0 2px 16px rgba(194,164,110,0.15);
   }
 
   .combo-imgs {
     display: flex;
-    gap: 6px;
+    gap: 4px;
   }
 
   .combo-img {
-    width: 44px;
-    height: 56px;
-    border-radius: 4px;
+    width: 42px;
+    height: 54px;
+    border-radius: 7px;
     object-fit: cover;
-    background: #eee;
-    border: 1px solid #e0ddd9;
+    border: 1px solid var(--border);
+    background: var(--surface2);
   }
 
-  .combo-img.empty {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    color: #ccc;
-  }
-
-  .combo-info {
-    flex: 1;
-  }
+  .combo-info { flex: 1; min-width: 0; }
 
   .combo-name {
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #1a1a1a;
-    margin-bottom: 4px;
-  }
-
-  .combo-desc {
-    font-size: 10px;
-    color: #aaa;
-    letter-spacing: 0.04em;
-  }
-
-  .combo-badge {
-    font-size: 9px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: 20px;
-    background: #f0ede9;
-    color: #888;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #bbb;
-  }
-
-  .empty-state p {
     font-size: 12px;
-    letter-spacing: 0.08em;
-    line-height: 1.8;
-  }
-
-  .item-name-input {
-    width: 72px;
-    font-size: 9px;
-    text-align: center;
-    border: none;
-    border-top: 1px solid #e0ddd9;
-    padding: 3px 2px;
-    background: transparent;
-    color: #555;
-    outline: none;
+    font-weight: 500;
     letter-spacing: 0.04em;
+    color: var(--ink);
+    margin-bottom: 3px;
   }
 
-  .item-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
-  }
-
-  .delete-btn {
-    position: absolute;
-    top: 3px;
-    right: 3px;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.5);
-    color: white;
-    border: none;
-    cursor: pointer;
+  .combo-pieces {
     font-size: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.15s;
+    color: var(--ink3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .item-wrapper:hover .delete-btn { opacity: 1; }
+  .combo-heart {
+    font-size: 18px;
+    transition: transform 0.2s;
+  }
 
-  .item-wrapper { position: relative; }
+  .combo-card.fav .combo-heart { transform: scale(1.2); }
 
+  /* ── EMPTY STATE ── */
+  .empty {
+    text-align: center;
+    padding: 60px 30px;
+  }
+
+  .empty-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+    opacity: 0.3;
+  }
+
+  .empty p {
+    font-size: 13px;
+    color: var(--ink3);
+    line-height: 1.7;
+  }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: calc(var(--safe-bottom) + 20px);
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--ink);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    z-index: 999;
+    transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>Sudoku Wardrobe</h1>
-  <span>Méthode sudoku — 9 pièces, infinies combinaisons</span>
+<header class="header">
+  <div class="header-inner">
+    <div>
+      <div class="logo">Sudoku <em>Wardrobe</em></div>
+      <div class="header-sub">9 pièces · infinies combinaisons</div>
+    </div>
+  </div>
 </header>
 
-<div class="app">
-
-  <!-- LEFT: Dressing -->
-  <aside>
-    <p class="panel-title">Mon Dressing</p>
-
-    <div class="category" id="cat-top">
-      <div class="category-label">Top</div>
-      <div class="items-row" id="items-top">
-        <label class="upload-btn" title="Ajouter un top">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Ajouter
-          <input type="file" accept="image/*" style="display:none" onchange="addItem('top', this)">
-        </label>
-      </div>
-    </div>
-
-    <div class="category" id="cat-layer">
-      <div class="category-label">Layer</div>
-      <div class="items-row" id="items-layer">
-        <label class="upload-btn" title="Ajouter un layer">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Ajouter
-          <input type="file" accept="image/*" style="display:none" onchange="addItem('layer', this)">
-        </label>
-      </div>
-    </div>
-
-    <div class="category" id="cat-pantalon">
-      <div class="category-label">Pantalon</div>
-      <div class="items-row" id="items-pantalon">
-        <label class="upload-btn" title="Ajouter un pantalon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Ajouter
-          <input type="file" accept="image/*" style="display:none" onchange="addItem('pantalon', this)">
-        </label>
-      </div>
-    </div>
-  </aside>
-
-  <!-- RIGHT: Grid + Combos -->
-  <main>
-    <div class="section-tabs">
-      <button class="tab active" onclick="showTab('grid')">Grille</button>
-      <button class="tab" onclick="showTab('combos')">Combinaisons</button>
-    </div>
-
-    <!-- GRID TAB -->
-    <div class="grid-section active" id="tab-grid">
-      <div class="sudoku-grid" id="sudoku-grid">
-        <!-- filled by JS -->
-      </div>
-      <div class="grid-actions">
-        <button class="btn btn-primary" onclick="generateGrid()">Générer la grille</button>
-        <button class="btn btn-secondary" onclick="showTab('combos')">Voir les combos →</button>
-      </div>
-    </div>
-
-    <!-- COMBOS TAB -->
-    <div class="combos-section" id="tab-combos">
-      <p class="combos-intro">Chaque carte représente un outfit complet (Top + Layer + Pantalon).<br>Cliquez sur une carte pour la mettre en avant.</p>
-      <div id="combos-container"></div>
-    </div>
-
-  </main>
+<div class="tabs">
+  <button class="tab active" onclick="goTab('dressing')">Dressing</button>
+  <button class="tab" onclick="goTab('grid')">Grille</button>
+  <button class="tab" onclick="goTab('combos')">Combos</button>
 </div>
 
+<!-- PAGE: DRESSING -->
+<div class="page active" id="page-dressing">
+  <div class="section-head">
+    <div class="section-title">Mon dressing</div>
+  </div>
+
+  <div class="category-block">
+    <div class="cat-label">Top</div>
+    <div class="items-scroll" id="scroll-top">
+      <label class="add-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Ajouter
+        <input type="file" accept="image/*" style="display:none" multiple onchange="addItems('top',this)">
+      </label>
+    </div>
+  </div>
+
+  <div class="category-block">
+    <div class="cat-label">Layer</div>
+    <div class="items-scroll" id="scroll-layer">
+      <label class="add-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Ajouter
+        <input type="file" accept="image/*" style="display:none" multiple onchange="addItems('layer',this)">
+      </label>
+    </div>
+  </div>
+
+  <div class="category-block">
+    <div class="cat-label">Pantalon</div>
+    <div class="items-scroll" id="scroll-pantalon">
+      <label class="add-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Ajouter
+        <input type="file" accept="image/*" style="display:none" multiple onchange="addItems('pantalon',this)">
+      </label>
+    </div>
+  </div>
+
+  <div class="gen-wrap">
+    <button class="gen-btn" onclick="generateAndGo()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+      Générer la grille
+    </button>
+  </div>
+</div>
+
+<!-- PAGE: GRID -->
+<div class="page" id="page-grid">
+  <div class="grid-wrap">
+    <div class="sudoku-grid" id="sudoku-grid"></div>
+    <div class="grid-hint" id="grid-hint">Ajoute tes vêtements dans Dressing,<br>puis génère ta grille.</div>
+    <button class="regen-btn" onclick="generateGrid()" id="regen-btn" style="display:none">↻ Nouvelle grille</button>
+  </div>
+</div>
+
+<!-- PAGE: COMBOS -->
+<div class="page" id="page-combos">
+  <div class="combos-wrap" id="combos-wrap">
+    <div class="empty">
+      <div class="empty-icon">✦</div>
+      <p>Génère d'abord ta grille<br>pour voir tes combinaisons.</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-// ── State ──────────────────────────────────────────────
 const wardrobe = { top: [], layer: [], pantalon: [] };
-let grid = null; // 3x3 array of {type, id}
-
 const TYPES = ['top', 'layer', 'pantalon'];
-const TYPE_LABELS = { top: 'Top', layer: 'Layer', pantalon: 'Pantalon' };
+const LABELS = { top: 'Top', layer: 'Layer', pantalon: 'Pantalon' };
+let grid = null;
 
-// Sudoku patterns (3 valid arrangements of [0,1,2] so each row+col has all 3)
-const SUDOKU_LAYOUTS = [
-  // layout[row][col] = type index (0=top,1=layer,2=pantalon)
+const LAYOUTS = [
   [[0,1,2],[1,2,0],[2,0,1]],
   [[0,2,1],[2,1,0],[1,0,2]],
+  [[1,0,2],[0,2,1],[2,1,0]],
+  [[2,0,1],[0,1,2],[1,2,0]],
 ];
 
-// ── Add item ───────────────────────────────────────────
-function addItem(type, input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const id = Date.now() + Math.random();
-    const name = file.name.replace(/\.[^.]+$/, '').slice(0, 14);
-    wardrobe[type].push({ id, src: e.target.result, name });
-    renderDressing(type);
-    input.value = '';
-  };
-  reader.readAsDataURL(file);
+// ── Tab navigation ──────────────────────────────────────
+function goTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['dressing','grid','combos'][i] === name);
+  });
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+}
+
+// ── Toast ───────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── Add items ───────────────────────────────────────────
+function addItems(type, input) {
+  [...input.files].forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      wardrobe[type].push({
+        id: Date.now() + Math.random(),
+        src: e.target.result,
+        name: file.name.replace(/\.[^.]+$/, '').slice(0, 16)
+      });
+      renderDressing(type);
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
 }
 
 function deleteItem(type, id) {
@@ -496,69 +624,58 @@ function deleteItem(type, id) {
   renderDressing(type);
   grid = null;
   renderGrid();
+  renderCombos();
 }
 
 function renderDressing(type) {
-  const container = document.getElementById('items-' + type);
-  const items = wardrobe[type];
+  const scroll = document.getElementById('scroll-' + type);
+  const btn = scroll.querySelector('label.add-btn');
+  [...scroll.children].forEach(c => { if (!c.classList.contains('add-btn')) c.remove(); });
 
-  // keep upload button
-  const uploadBtn = container.querySelector('label.upload-btn');
-
-  // clear non-upload children
-  [...container.children].forEach(c => { if (!c.classList.contains('upload-btn')) c.remove(); });
-
-  items.forEach(item => {
+  wardrobe[type].forEach(item => {
     const wrap = document.createElement('div');
-    wrap.className = 'item-wrapper';
+    wrap.className = 'item-wrap';
     wrap.innerHTML = `
-      <img src="${item.src}" class="item-thumb" title="${item.name}">
-      <button class="delete-btn" onclick="deleteItem('${type}', ${item.id})" title="Supprimer">✕</button>
-      <input class="item-name-input" value="${item.name}" onchange="renameItem('${type}', ${item.id}, this.value)">
+      <img src="${item.src}" class="item-img">
+      <button class="item-del" onclick="deleteItem('${type}',${item.id})">✕</button>
+      <div class="item-name">${item.name}</div>
     `;
-    container.insertBefore(wrap, uploadBtn);
+    scroll.insertBefore(wrap, btn);
   });
 }
 
-function renameItem(type, id, name) {
-  const item = wardrobe[type].find(i => i.id === id);
-  if (item) item.name = name;
-}
-
-// ── Grid ───────────────────────────────────────────────
-function generateGrid() {
+// ── Grid ────────────────────────────────────────────────
+function generateAndGo() {
   const missing = TYPES.filter(t => wardrobe[t].length === 0);
-  if (missing.length > 0) {
-    alert('Ajoute au moins 1 ' + missing.map(t => TYPE_LABELS[t]).join(', ') + ' dans ton dressing !');
+  if (missing.length) {
+    showToast('Ajoute un ' + missing.map(t => LABELS[t]).join(', '));
     return;
   }
+  generateGrid();
+  goTab('grid');
+}
 
-  // Pick a random sudoku layout
-  const layout = SUDOKU_LAYOUTS[Math.floor(Math.random() * SUDOKU_LAYOUTS.length)];
+function generateGrid() {
+  const missing = TYPES.filter(t => wardrobe[t].length === 0);
+  if (missing.length) { showToast('Ajoute un ' + missing.map(t => LABELS[t]).join(', ')); return; }
 
-  // For each type, pick 3 items (with repetition if < 3)
+  const layout = LAYOUTS[Math.floor(Math.random() * LAYOUTS.length)];
   const picks = {};
   TYPES.forEach(t => {
-    const pool = wardrobe[t];
-    const chosen = [];
-    for (let i = 0; i < 3; i++) chosen.push(pool[i % pool.length]);
-    // shuffle
-    chosen.sort(() => Math.random() - 0.5);
-    picks[t] = chosen;
+    const pool = [...wardrobe[t]].sort(() => Math.random() - 0.5);
+    picks[t] = [pool[0 % pool.length], pool[1 % pool.length], pool[2 % pool.length]];
   });
 
-  // Build 3x3 grid
   grid = [];
   for (let r = 0; r < 3; r++) {
     grid[r] = [];
     for (let c = 0; c < 3; c++) {
       const typeIdx = layout[r][c];
       const type = TYPES[typeIdx];
-      // index within picks[type] based on how many times this type appeared so far in the layout
       let count = 0;
       for (let pr = 0; pr < r; pr++) for (let pc = 0; pc < 3; pc++) if (layout[pr][pc] === typeIdx) count++;
       for (let pc = 0; pc < c; pc++) if (layout[r][pc] === typeIdx) count++;
-      grid[r][c] = { type, item: picks[type][count] };
+      grid[r][c] = { type, item: picks[type][count % picks[type].length] };
     }
   }
 
@@ -568,19 +685,24 @@ function generateGrid() {
 
 function renderGrid() {
   const container = document.getElementById('sudoku-grid');
+  const hint = document.getElementById('grid-hint');
+  const regenBtn = document.getElementById('regen-btn');
   container.innerHTML = '';
 
   if (!grid) {
-    // empty placeholder
-    for (let i = 0; i < 9; i++) {
+    TYPES.concat(TYPES).concat(TYPES).slice(0,9).forEach((t, i) => {
       const cell = document.createElement('div');
-      cell.className = 'grid-cell';
-      const types = ['Top','Layer','Pantalon'];
-      cell.innerHTML = `<span style="font-size:9px;letter-spacing:0.1em;color:#ddd">${types[i % 3]}</span>`;
+      cell.className = 'grid-cell empty-cell';
+      cell.innerHTML = `<span class="cell-placeholder">${LABELS[TYPES[i % 3]]}</span>`;
       container.appendChild(cell);
-    }
+    });
+    hint.style.display = 'block';
+    regenBtn.style.display = 'none';
     return;
   }
+
+  hint.style.display = 'none';
+  regenBtn.style.display = 'block';
 
   for (let r = 0; r < 3; r++) {
     for (let c = 0; c < 3; c++) {
@@ -589,123 +711,96 @@ function renderGrid() {
       cell.className = 'grid-cell';
       cell.innerHTML = `
         <img src="${item.src}" alt="${item.name}">
-        <span class="cell-type-badge">${TYPE_LABELS[type]}</span>
-        <span class="cell-label">${item.name}</span>
+        <span class="cell-badge">${LABELS[type]}</span>
+        <span class="cell-name">${item.name}</span>
       `;
       container.appendChild(cell);
     }
   }
 }
 
-// ── Combos ─────────────────────────────────────────────
-function getOutfit(cells) {
-  // cells: array of {type, item}
-  // An outfit is valid if it has exactly one top, one layer, one pantalon
-  const types = cells.map(c => c.type);
-  return TYPES.every(t => types.includes(t)) ? cells : null;
-}
-
+// ── Combos ──────────────────────────────────────────────
 function buildCombos() {
   if (!grid) return [];
-  const flat = [];
-  for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) flat.push({ r, c, ...grid[r][c] });
-
   const candidates = [];
 
-  // Rows
-  for (let r = 0; r < 3; r++) candidates.push({ name: `Ligne ${r+1}`, cells: [grid[r][0], grid[r][1], grid[r][2]] });
-
-  // Columns
-  for (let c = 0; c < 3; c++) candidates.push({ name: `Colonne ${c+1}`, cells: [grid[0][c], grid[1][c], grid[2][c]] });
-
-  // Diagonals
+  for (let r = 0; r < 3; r++)
+    candidates.push({ name: `Ligne ${r+1}`, cells: [grid[r][0], grid[r][1], grid[r][2]] });
+  for (let c = 0; c < 3; c++)
+    candidates.push({ name: `Colonne ${c+1}`, cells: [grid[0][c], grid[1][c], grid[2][c]] });
   candidates.push({ name: 'Diagonale ↘', cells: [grid[0][0], grid[1][1], grid[2][2]] });
   candidates.push({ name: 'Diagonale ↙', cells: [grid[0][2], grid[1][1], grid[2][0]] });
+  candidates.push({ name: 'Coins haut + centre', cells: [grid[0][0], grid[1][1], grid[0][2]] });
+  candidates.push({ name: 'Coins bas + centre', cells: [grid[2][0], grid[1][1], grid[2][2]] });
 
-  // L-shapes and other 3-combos from corners + center
-  const corners = [[0,0],[0,2],[2,0],[2,2]];
-  const center = grid[1][1];
-  corners.forEach(([r,c]) => {
-    candidates.push({ name: `Coin (${r},${c}) + Centre`, cells: [grid[r][c], center, grid[2-r][2-c]] });
-  });
-
-  // Filter valid outfits
   const outfits = [];
   const seen = new Set();
   candidates.forEach(({ name, cells }) => {
-    const outfit = getOutfit(cells);
-    if (!outfit) return;
-    const key = TYPES.map(t => outfit.find(c => c.type === t).item.id).join('-');
+    const types = cells.map(c => c.type);
+    if (!TYPES.every(t => types.includes(t))) return;
+    const key = TYPES.map(t => cells.find(c => c.type === t).item.id).join('-');
     if (seen.has(key)) return;
     seen.add(key);
-    outfits.push({ name, cells: outfit });
+    outfits.push({ name, cells });
   });
-
   return outfits;
 }
 
 function renderCombos() {
-  const container = document.getElementById('combos-container');
+  const container = document.getElementById('combos-wrap');
   const outfits = buildCombos();
 
-  if (outfits.length === 0) {
-    container.innerHTML = `<div class="empty-state"><p>Génère la grille d'abord<br>pour voir tes combinaisons.</p></div>`;
+  if (!outfits.length) {
+    container.innerHTML = `<div class="empty"><div class="empty-icon">✦</div><p>Génère d'abord ta grille<br>pour voir tes combinaisons.</p></div>`;
     return;
   }
 
-  // Group by type
   const rows = outfits.filter(o => o.name.startsWith('Ligne'));
   const cols = outfits.filter(o => o.name.startsWith('Colonne'));
   const diags = outfits.filter(o => o.name.startsWith('Diagonale'));
   const others = outfits.filter(o => !rows.includes(o) && !cols.includes(o) && !diags.includes(o));
 
   const groups = [
-    { label: 'Lectures horizontales', items: rows },
-    { label: 'Lectures verticales', items: cols },
+    { label: 'Horizontales', items: rows },
+    { label: 'Verticales', items: cols },
     { label: 'Diagonales', items: diags },
-    { label: 'Autres combinaisons', items: others },
-  ].filter(g => g.items.length > 0);
+    { label: 'Autres combos', items: others },
+  ].filter(g => g.items.length);
 
-  container.innerHTML = groups.map(g => `
+  container.innerHTML = `<p style="font-size:11px;color:var(--ink3);margin-bottom:20px;line-height:1.7">${outfits.length} outfit${outfits.length>1?'s':''} trouvé${outfits.length>1?'s':''}. Appuie sur ❤️ pour sauvegarder.</p>` +
+  groups.map(g => `
     <div class="combo-group">
-      <div class="combo-group-title">${g.label}</div>
-      <div class="combos-list">
-        ${g.items.map(outfit => {
-          const byType = {};
-          outfit.cells.forEach(c => byType[c.type] = c.item);
-          return `
-            <div class="combo-card" onclick="this.classList.toggle('highlighted')">
-              <div class="combo-imgs">
-                ${TYPES.map(t => byType[t]
-                  ? `<img class="combo-img" src="${byType[t].src}" title="${byType[t].name}">`
-                  : `<div class="combo-img empty">?</div>`
-                ).join('')}
-              </div>
-              <div class="combo-info">
-                <div class="combo-name">${outfit.name}</div>
-                <div class="combo-desc">${TYPES.map(t => byType[t] ? byType[t].name : '—').join(' · ')}</div>
-              </div>
-              <span class="combo-badge">Outfit</span>
+      <div class="combo-group-label">${g.label}</div>
+      ${g.items.map(outfit => {
+        const byType = {};
+        outfit.cells.forEach(c => byType[c.type] = c.item);
+        return `
+          <div class="combo-card" onclick="this.classList.toggle('fav')">
+            <div class="combo-imgs">
+              ${TYPES.map(t => `<img class="combo-img" src="${byType[t].src}" title="${byType[t].name}">`).join('')}
             </div>
-          `;
-        }).join('')}
-      </div>
+            <div class="combo-info">
+              <div class="combo-name">${outfit.name}</div>
+              <div class="combo-pieces">${TYPES.map(t => byType[t].name).join(' · ')}</div>
+            </div>
+            <span class="combo-heart">🤍</span>
+          </div>
+        `;
+      }).join('')}
     </div>
   `).join('');
-}
 
-// ── Tabs ───────────────────────────────────────────────
-function showTab(name) {
-  document.querySelectorAll('.tab').forEach((t, i) => {
-    t.classList.toggle('active', ['grid','combos'][i] === name);
+  // swap heart on fav toggle
+  document.querySelectorAll('.combo-card').forEach(card => {
+    const obs = new MutationObserver(() => {
+      card.querySelector('.combo-heart').textContent = card.classList.contains('fav') ? '❤️' : '🤍';
+    });
+    obs.observe(card, { attributes: true, attributeFilter: ['class'] });
   });
-  document.getElementById('tab-grid').classList.toggle('active', name === 'grid');
-  document.getElementById('tab-combos').classList.toggle('active', name === 'combos');
 }
 
 // Init
 renderGrid();
-renderCombos();
 </script>
 </body>
 </html>
